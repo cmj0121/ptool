@@ -1,0 +1,19 @@
+#! /usr/bin/env bash
+
+USERNAME=${USERNAME:-pentest}
+PASSWORD=${PASSWORD:$(< /dev/urandom tr -dc A-Z-a-z-0-9 | head -c12)}
+
+USER_UID=${USER_UID:-5566}
+
+if [ "`id -u "${USERNAME}" 2>/dev/null`" == "" ]; then
+	adduser -D -u ${USER_UID} ${USERNAME}
+	echo "${USERNAME}:${PASSWORD}" | chpasswd
+fi
+
+ssh-keygen -A
+
+mkdir -p /home/${USERNAME}/.ssh
+chown ${USERNAME} /home/${USERNAME}/.ssh
+chmod 700 /home/${USERNAME}/.ssh
+
+exec /usr/sbin/sshd -D -e
