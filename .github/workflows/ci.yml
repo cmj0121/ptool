@@ -25,4 +25,4 @@ jobs:
         run: echo ::set-output name=VERSION::$(echo $GIHBUT_REF | cut -d / -f 3)
       - name: push
         run: TAG=TAG make push
-        if: startsWith(github.ref, 'ref/head/v')
+        if: startsWith(github.ref, 'refs/tags/v')
