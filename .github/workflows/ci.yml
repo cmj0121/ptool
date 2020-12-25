@@ -1,5 +1,4 @@
 name: ci_cd
-description: the CI/CD via the GitHub Action
 
 on:
   - push
@@ -20,7 +19,7 @@ jobs:
         with:
           registry: ghcr.io
           username: ${{ github.repository_owner }}
-          password: ${{ secret.GHCR_TOKEN }}
+          password: ${{ secrets.GHCR_TOKEN }}
       - name: git tag
         id: tag
         run: echo ::set-output name=VERSION::$(echo $GIHBUT_REF | cud -d / -f 3)
