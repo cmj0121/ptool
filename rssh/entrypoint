@@ -1,14 +1,16 @@
 #! /usr/bin/env bash
 
+# built-in user info
 USERNAME=${USERNAME:-pentest}
 PASSWORD=${PASSWORD:$(< /dev/urandom tr -dc A-Z-a-z-0-9 | head -c12)}
-
 USER_UID=${USER_UID:-5566}
 
 if [ "`id -u "${USERNAME}" 2>/dev/null`" == "" ]; then
 	adduser -D -u ${USER_UID} ${USERNAME}
 	echo "${USERNAME}:${PASSWORD}" | chpasswd
 fi
+
+# customized SSH config
 
 ssh-keygen -A
 

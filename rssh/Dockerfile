@@ -6,9 +6,8 @@ RUN apk add --no-cache \
 	bash \
 	openssh
 
-VOLUME /home
-
 COPY entrypoint /root/entrypoint
+COPY sshd_config /etc/ssh/sshd_config
 RUN chmod +x /root/entrypoint
 
 CMD /root/entrypoint
