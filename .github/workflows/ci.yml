@@ -22,7 +22,7 @@ jobs:
           password: ${{ secrets.GHCR_TOKEN }}
       - name: git tag
         id: tag
-        run: echo ::set-output name=VERSION::$(echo $GIHBUT_REF | cud -d / -f 3)
+        run: echo ::set-output name=VERSION::$(echo $GIHBUT_REF | cut -d / -f 3)
       - name: push
         run: TAG=TAG make push
         if: ${{ github.ref == 'ref/head/v*' }}
