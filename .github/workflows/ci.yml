@@ -5,9 +5,9 @@ on:
 
 
 jobs:
-  build_image:
+  build_and_push_image:
     runs-on: ubuntu-latest
-    name: build docker image
+    name: build/push docker image
 
     steps:
       - name: checkout
@@ -23,3 +23,6 @@ jobs:
       - name: git tag
         id: tag
         run: echo ::set-output name=VERSION::$(echo $GIHBUT_REF | cud -d / -f 3)
+      - name: push
+        run: TAG=TAG make push
+        if: {{ github.ref == 'ref/head/v*' }}

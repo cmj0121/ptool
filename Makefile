@@ -1,4 +1,6 @@
-.PHONY: all clean help
+SUBDIR := rssh
+
+.PHONY: all clean help $(SUBDIR)
 
 all:		# build all
 
@@ -9,3 +11,8 @@ help:		# show this message
 	@printf "\n"
 	@perl -nle 'print $$& if m{^[\w-]+:.*?#.*$$}' $(MAKEFILE_LIST) | \
 		awk 'BEGIN {FS = ":.*?#"} {printf "    %-18s %s\n", $$1, $$2}'
+
+build push:	$(SUBDIR)
+
+$(SUBDIR):
+	$(MAKE) -C $@ $(MAKECMDGOALS)
