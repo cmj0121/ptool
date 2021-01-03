@@ -1,6 +1,7 @@
 SUBDIR := rssh
+BIN := forensic
 
-.PHONY: all clean help $(SUBDIR)
+.PHONY: all clean help install $(SUBDIR)
 
 all:		# build all
 
@@ -16,3 +17,6 @@ build push:	$(SUBDIR)
 
 $(SUBDIR):
 	$(MAKE) -C $@ $(MAKECMDGOALS)
+
+install:
+	install -m755 $(BIN) /usr/local/bin/
