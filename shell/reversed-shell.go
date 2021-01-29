@@ -3,8 +3,9 @@ package shell
 
 import (
 	"bytes"
-	_ "embed"
 	"text/template"
+
+	_ "embed"
 
 	"github.com/cmj0121/argparse"
 	"github.com/cmj0121/logger"
