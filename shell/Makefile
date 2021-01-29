@@ -1,7 +1,9 @@
 .PHONY: all clean help install restart
 
-GO  = ~/go/bin/go1.16rc1
-BIN =$(subst .go,,$(wildcard cmd/*.go))
+GO     = ~/go/bin/go1.16rc1
+BIN    = $(subst .go,,$(wildcard cmd/*.go))
+SRC    = $(wildcard *.go)
+ASSETS = $(wildcard assets/*)
 
 all: $(BIN)
 
@@ -26,5 +28,5 @@ restart:	# restart the SaaS service
 	nginx -t
 	systemctl restart nginx
 
-%: %.go
+%: %.go $(SRC) $(ASSETS)
 	$(GO) build -o $@ $<
