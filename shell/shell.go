@@ -73,7 +73,7 @@ func (shell *Shell) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			port = matched[2]
 		}
 
-		tmpl := template.Must(template.New("reversed-shell").Parse(TMPL_ReversedShell))
+		tmpl := template.Must(template.New("reversed-shell").Parse(tmplReversedShell))
 		tmpl.Execute(w, struct {
 			IP string
 			PORT string
@@ -81,8 +81,23 @@ func (shell *Shell) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			IP: ip,
 			PORT: port,
 		})
+	case RE_SCAN_IP_HOST.MatchString(path):
+		ip_host := "127.0.0.1"
+		if matched := RE_SCAN_IP_HOST.FindStringSubmatch(path); matched[1] != "" {
+			ip_host = matched[1]
+		}
+		tmpl := template.Must(template.New("scan").Parse(tmplScanIPHost))
+		tmpl.Execute(w, ip_host)
+	case RE_WEB_SCAN.MatchString(path):
+		link := "localhost"
+
+		if matched := RE_WEB_SCAN.FindStringSubmatch(path); matched[1] != "" {
+			link = matched[1]
+		}
+		tmpl := template.Must(template.New("web").Parse(tmplWeb))
+		tmpl.Execute(w, link)
 	default:
-		w.Write([]byte(TMPL_Welcome))
+		w.Write([]byte(tmplWelcome))
 	}
 }
 

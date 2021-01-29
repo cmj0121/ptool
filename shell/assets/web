@@ -1,0 +1,6 @@
+#! /usr/bin/env sh
+#
+# Saas (Shell-as-a-Service) based on https://github.com/cmj0121/ptool/shell
+# This shell-script provide to scan the target by IP
+
+curl {{ . }} | grep -oE "(href|src)=([\"']).*?\2" | sort | uniq
