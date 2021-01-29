@@ -1,0 +1,4 @@
+#! /usr/bin/env bash
+# Saas (Shell-as-a-Service) based on https://github.com/cmj0121/ptool/shell
+
+exit 0

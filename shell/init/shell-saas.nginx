@@ -1,0 +1,19 @@
+server {
+	listen      80;
+	server_name shell.cmj.tw;
+	rewrite     ^   https://$server_name$request_uri? permanent;
+}
+
+server {
+	listen      443 ssl;
+	server_name shell.cmj.tw;
+
+	ssl_certificate         /etc/letsencrypt/live/shell.cmj.tw/fullchain.pem;
+	ssl_certificate_key     /etc/letsencrypt/live/shell.cmj.tw/privkey.pem;
+
+	location / {
+		proxy_pass			http://127.0.0.1:8888/;
+		proxy_set_header	X-Real-IP	$remote_addr;
+	}
+}
+#vim: ft=nginx:

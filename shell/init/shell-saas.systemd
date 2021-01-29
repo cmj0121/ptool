@@ -1,0 +1,15 @@
+[Unit]
+Description=Go-based Shell-as-a-service
+
+[Service]
+Type=simple
+User=nobody
+Group=nobody
+Restart=always
+RestartSec=10
+ExecStart=/usr/local/bin/shell-saas --log info --bind 127.0.0.1:8888
+
+[Install]
+WantedBy=multi-user.target
+
+# vim: set ft=systemd:
