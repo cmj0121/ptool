@@ -5,7 +5,6 @@ import (
 	"github.com/cmj0121/ptool/shell"
 )
 
-
 func main() {
 	agent := shell.New()
 	agent.Run()

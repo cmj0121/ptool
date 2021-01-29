@@ -1,5 +1,7 @@
 github.com/cmj0121/argparse v0.6.3 h1:1Y77Cw+d8dbQ3hcYK2d7W0Q+GKN8aIBP15tc4T+d0q0=
 github.com/cmj0121/argparse v0.6.3/go.mod h1:MJZURHuGfUudCyY37n/hPSs2gD+pHd07foZ3/Xallok=
+github.com/cmj0121/argparse v0.6.4 h1:xCoNn3BJqzij85HNkK4Og7eT1JW48PTxxH4/TdS/tuo=
+github.com/cmj0121/argparse v0.6.4/go.mod h1:MJZURHuGfUudCyY37n/hPSs2gD+pHd07foZ3/Xallok=
 github.com/cmj0121/logger v1.2.1/go.mod h1:N9vkhQgq34KIbnPLc9NMcCoA7AL95CBEVG0Mi5hpFsA=
 github.com/cmj0121/logger v1.2.2 h1:ROtl6vRaYTRyugR0MCmSVQQ8U4XMfTWcaU15jnwOeEA=
 github.com/cmj0121/logger v1.2.2/go.mod h1:qaqPLFd6UBNSb4r/KJL12cn/lqHb1inqeivLzEhlI1I=

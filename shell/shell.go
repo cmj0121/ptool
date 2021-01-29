@@ -2,12 +2,19 @@
 package shell
 
 import (
+	"bytes"
+	_ "embed"
 	"fmt"
-	"net/http"
+	"os"
 	"text/template"
 
-	"github.com/cmj0121/logger"
 	"github.com/cmj0121/argparse"
+	"github.com/cmj0121/logger"
+)
+
+var (
+	//go:embed assets/welcome
+	tmplWelcome string
 )
 
 func Version() (ver string) {
@@ -22,13 +29,15 @@ type Shell struct {
 	*logger.Logger `-`
 	LogLevel       string `name:"log" choices:"warn info debug verbose" help:"log level"`
 
-	Bind string
+	Bind *string `help:"run the server mode and bind on IP:PORT"`
+
+	*ReversedShell `name:"reversed" help:"generate the reversed-shell script"`
+	*Scan          `help:"generate the scan script"`
 }
 
 func New() (shell *Shell) {
-	shell = &Shell {
-		Logger:    logger.New(PROJ_NAME),
-		Bind: ":12345",
+	shell = &Shell{
+		Logger: logger.New(PROJ_NAME),
 	}
 	return
 }
@@ -41,63 +50,42 @@ func (shell *Shell) callbackVersion(parser *argparse.ArgParse) (exit bool) {
 func (shell *Shell) Run() {
 	argparse.RegisterCallback(argparse.FN_VERSION, shell.callbackVersion)
 	parser := argparse.MustNew(shell)
-	switch err := parser.Run(); err {
-	case nil:
+	if err := parser.Run(); err == nil {
 		shell.Logger.SetLevel(shell.LogLevel)
-		shell.Logger.Info("start run on %s", shell.Bind)
-		if err := http.ListenAndServe(shell.Bind, shell); err != nil {
-			shell.Logger.Crit("http server: %v", err)
+
+		switch {
+		case shell.Bind != nil:
+			// force clean-up the setting
+			shell.ReversedShell = nil
+			shell.Scan = nil
+			shell.ListenAndServe()
+		default:
+			if data, err := shell.Generate(); err == nil {
+				// show the script template on STDOUT
+				os.Stdout.Write(data)
+			}
 		}
 	}
 }
 
-func (shell *Shell) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	shell.Logger.Info("serve %-22s [%s] %s",r.RemoteAddr, r.Method, r.URL)
-
-	// always set the header as text/plain
-	w.Header().Add("Content-Type", "text/plain")
-
-	// the query PATH
-	path := r.URL.EscapedPath()
-	shell.Logger.Debug("process the PATH: %#v", path)
+func (shell *Shell) Generate() (data []byte, err error) {
 	switch {
-	case RE_REVERSED_SHELL.MatchString(path):
-		ip := "127.0.0.1"
-		port := "8888"
-
-		matched := RE_REVERSED_SHELL.FindStringSubmatch(path)
-		if matched[1] != "" {
-			ip = matched[1]
-		}
-		if matched[2] != "" {
-			port = matched[2]
-		}
-
-		tmpl := template.Must(template.New("reversed-shell").Parse(tmplReversedShell))
-		tmpl.Execute(w, struct {
-			IP string
-			PORT string
-		} {
-			IP: ip,
-			PORT: port,
-		})
-	case RE_SCAN_IP_HOST.MatchString(path):
-		ip_host := "127.0.0.1"
-		if matched := RE_SCAN_IP_HOST.FindStringSubmatch(path); matched[1] != "" {
-			ip_host = matched[1]
-		}
-		tmpl := template.Must(template.New("scan").Parse(tmplScanIPHost))
-		tmpl.Execute(w, ip_host)
-	case RE_WEB_SCAN.MatchString(path):
-		link := "localhost"
-
-		if matched := RE_WEB_SCAN.FindStringSubmatch(path); matched[1] != "" {
-			link = matched[1]
-		}
-		tmpl := template.Must(template.New("web").Parse(tmplWeb))
-		tmpl.Execute(w, link)
+	case shell.ReversedShell != nil:
+		// generate reversed-shell
+		data, err = shell.ReversedShell.Generate(shell.Logger)
+	case shell.Scan != nil:
+		// generate scan shell
+		data, err = shell.Scan.Generate(shell.Logger)
 	default:
-		w.Write([]byte(tmplWelcome))
-	}
-}
+		tmpl := template.Must(template.New("welcome").Parse(tmplWelcome))
+		buff := bytes.NewBuffer(nil)
+		if err = tmpl.Execute(buff, shell); err != nil {
+			shell.Logger.Warn("cannot parse template: %v", err)
+			return
+		}
 
+		data = buff.Bytes()
+	}
+
+	return
+}

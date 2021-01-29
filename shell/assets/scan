@@ -2,6 +2,13 @@
 #
 # Saas (Shell-as-a-Service) based on https://github.com/cmj0121/ptool/shell
 # This shell-script provide to scan the target by IP/Hostname
+#
+# extra parameter
+#    - ?format=web
 
-nmap -O -A {{ . }}
-nmap -sU --top-ports 15 {{ . }}
+{{ if .Web -}}
+curl {{ .IPHost }} | grep -oE "(href|src)=([\"']).*?\2" | sort | uniq
+{{- else -}}
+nmap -O -A {{ .IPHost }}
+nmap -sU --top-ports 15 {{ .IPHost }}
+{{- end }}

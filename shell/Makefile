@@ -30,3 +30,13 @@ restart:	# restart the SaaS service
 
 %: %.go $(SRC) $(ASSETS)
 	$(GO) build -o $@ $<
+
+$(BIN): linter
+
+linter: .benchmark
+	gofmt -w -s $(shell find . -name '*.go')
+	$(GO) test -cover -failfast -timeout 2s ./...
+
+.benchmark: $(SRC)
+	touch $@
+	$(GO) test -bench=. -cover -failfast -benchmem
