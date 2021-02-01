@@ -3,7 +3,8 @@
 # This shell-script provide to scan the target by IP/Hostname
 #
 # extra parameter
-#    - ?format=web
+#    - t=TARGET
+#    - format=web
 
 {{ if .Web -}}
 curl {{ .IPHost }} | grep -oE "(href|src)=([\"']).*?\2" | sort | uniq

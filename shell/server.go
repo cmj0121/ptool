@@ -16,6 +16,7 @@ import (
 const (
 	KEY_FORMAT = "format"
 	KEY_ENCODE = "encode"
+	KEY_TARGET = "t"
 
 	KEY_FMT_PYTHON = "python"
 	KEY_FMT_BASH   = "bash"
@@ -30,7 +31,7 @@ var tmplExecBase64 string
 
 var (
 	RE_REVERSED     = regexp.MustCompile(`^/reversed(?:/(\d+\.\d+\.\d+\.\d+):(\d+))?$`)
-	RE_SCAN         = regexp.MustCompile(`^/scan(?:/([\w\.-]+))?$`)
+	RE_SCAN         = regexp.MustCompile(`^/scan$`)
 	RE_BASH_COMMENT = regexp.MustCompile(`#.*?\n`)
 )
 
@@ -77,16 +78,14 @@ func (shell *Shell) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 		data, _ = agent.Generate(shell.Logger)
 	case RE_SCAN.MatchString(path):
-		match := RE_SCAN.FindStringSubmatch(path)
 		agent := &Scan{}
-
+		agent.IPHost = strings.Join(r.URL.Query()[KEY_TARGET], "")
+		if agent.IPHost == "" {
+			agent.IPHost = "127.0.0.1"
+		}
 		switch format := r.URL.Query()[KEY_FORMAT]; strings.Join(format, "") {
 		case KEY_FMT_WEB:
 			agent.Web = true
-		}
-
-		if agent.IPHost = match[1]; agent.IPHost == "" {
-			agent.IPHost = "127.0.0.1"
 		}
 
 		data, _ = agent.Generate(shell.Logger)
