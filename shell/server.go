@@ -32,7 +32,7 @@ var tmplExecBase64 string
 var (
 	RE_REVERSED     = regexp.MustCompile(`^/reversed(?:/(\d+\.\d+\.\d+\.\d+):(\d+))?$`)
 	RE_SCAN         = regexp.MustCompile(`^/scan$`)
-	RE_SCRIPT       = regexp.MustCompile(`^/script/(phprfi)$`)
+	RE_SCRIPT       = regexp.MustCompile(`^/script/(phprfi)(?:/[\S]*)$`)
 	RE_BASH_COMMENT = regexp.MustCompile(`#.*?\n`)
 )
 
