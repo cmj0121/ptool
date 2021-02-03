@@ -32,6 +32,7 @@ var tmplExecBase64 string
 var (
 	RE_REVERSED     = regexp.MustCompile(`^/reversed(?:/(\d+\.\d+\.\d+\.\d+):(\d+))?$`)
 	RE_SCAN         = regexp.MustCompile(`^/scan$`)
+	RE_SCRIPT       = regexp.MustCompile(`^/script/(phprfi)$`)
 	RE_BASH_COMMENT = regexp.MustCompile(`#.*?\n`)
 )
 
@@ -88,6 +89,10 @@ func (shell *Shell) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			agent.Web = true
 		}
 
+		data, _ = agent.Generate(shell.Logger)
+	case RE_SCRIPT.MatchString(path):
+		agent := &Script{}
+		agent.PHPRFI = true
 		data, _ = agent.Generate(shell.Logger)
 	default:
 		data, _ = shell.Generate()

@@ -33,6 +33,7 @@ type Shell struct {
 
 	*ReversedShell `name:"reversed" help:"generate the reversed-shell script"`
 	*Scan          `help:"generate the scan script"`
+	*Script        `help:"generate script"`
 }
 
 func New() (shell *Shell) {
@@ -58,6 +59,7 @@ func (shell *Shell) Run() {
 			// force clean-up the setting
 			shell.ReversedShell = nil
 			shell.Scan = nil
+			shell.Script = nil
 			shell.ListenAndServe()
 		default:
 			if data, err := shell.Generate(); err == nil {
@@ -76,6 +78,9 @@ func (shell *Shell) Generate() (data []byte, err error) {
 	case shell.Scan != nil:
 		// generate scan shell
 		data, err = shell.Scan.Generate(shell.Logger)
+	case shell.Script != nil:
+		// generate scan shell
+		data, err = shell.Script.Generate(shell.Logger)
 	default:
 		tmpl := template.Must(template.New("welcome").Parse(tmplWelcome))
 		buff := bytes.NewBuffer(nil)

