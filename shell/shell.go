@@ -17,11 +17,6 @@ var (
 	tmplWelcome string
 )
 
-func Version() (ver string) {
-	ver = fmt.Sprintf("%v (v%d.%d.%d)", PROJ_NAME, MAJOR, MINOR, MACRO)
-	return
-}
-
 type Shell struct {
 	argparse.Model
 
@@ -62,7 +57,23 @@ func (shell *Shell) Run() {
 			shell.Script = nil
 			shell.ListenAndServe()
 		default:
-			if data, err := shell.Generate(); err == nil {
+			var generator Generator
+
+			switch {
+			case shell.ReversedShell != nil:
+				// generate reversed-shell
+				generator = shell.ReversedShell
+			case shell.Scan != nil:
+				// generate scan shell
+				generator = shell.Scan
+			case shell.Script != nil:
+				// generate scan shell
+				generator = shell.Script
+			default:
+				generator = shell
+			}
+
+			if data, err := generator.Generate(shell.Logger); err == nil {
 				// show the script template on STDOUT
 				os.Stdout.Write(data)
 			}
@@ -70,27 +81,15 @@ func (shell *Shell) Run() {
 	}
 }
 
-func (shell *Shell) Generate() (data []byte, err error) {
-	switch {
-	case shell.ReversedShell != nil:
-		// generate reversed-shell
-		data, err = shell.ReversedShell.Generate(shell.Logger)
-	case shell.Scan != nil:
-		// generate scan shell
-		data, err = shell.Scan.Generate(shell.Logger)
-	case shell.Script != nil:
-		// generate scan shell
-		data, err = shell.Script.Generate(shell.Logger)
-	default:
-		tmpl := template.Must(template.New("welcome").Parse(tmplWelcome))
-		buff := bytes.NewBuffer(nil)
-		if err = tmpl.Execute(buff, shell); err != nil {
-			shell.Logger.Warn("cannot parse template: %v", err)
-			return
-		}
-
-		data = buff.Bytes()
+func (shell *Shell) Generate(log *logger.Logger) (data []byte, err error) {
+	tmpl := template.Must(template.New("welcome").Parse(tmplWelcome))
+	buff := bytes.NewBuffer(nil)
+	if err = tmpl.Execute(buff, Version()); err != nil {
+		shell.Logger.Warn("cannot parse template: %v", err)
+		return
 	}
+
+	data = buff.Bytes()
 
 	return
 }

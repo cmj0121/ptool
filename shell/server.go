@@ -55,6 +55,7 @@ func (shell *Shell) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	path := r.URL.EscapedPath()
 	shell.Logger.Debug("process the PATH: %#v", path)
 
+	var generator Generator
 	switch {
 	case RE_REVERSED.MatchString(path):
 		match := RE_REVERSED.FindStringSubmatch(path)
@@ -77,7 +78,7 @@ func (shell *Shell) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			agent.Port = 5566
 		}
 
-		data, _ = agent.Generate(shell.Logger)
+		generator = agent
 	case RE_SCAN.MatchString(path):
 		agent := &Scan{}
 		agent.IPHost = strings.Join(r.URL.Query()[KEY_TARGET], "")
@@ -89,15 +90,17 @@ func (shell *Shell) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			agent.Web = true
 		}
 
-		data, _ = agent.Generate(shell.Logger)
+		generator = agent
 	case RE_SCRIPT.MatchString(path):
 		agent := &Script{}
 		agent.PHPRFI = true
-		data, _ = agent.Generate(shell.Logger)
+
+		generator = agent
 	default:
-		data, _ = shell.Generate()
+		generator = shell
 	}
 
+	data, _ = generator.Generate(shell.Logger)
 	// reply the shell script
 	w.Write(shell.Encode(data, strings.Join(r.URL.Query()[KEY_ENCODE], "")))
 }
