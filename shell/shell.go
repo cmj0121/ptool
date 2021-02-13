@@ -28,6 +28,7 @@ type Shell struct {
 
 	*ReversedShell `name:"reversed" help:"generate the reversed-shell script"`
 	*Scan          `help:"generate the scan script"`
+	*DNS           `help:"generate DNS recon script"`
 	*Script        `help:"generate script"`
 }
 
@@ -55,6 +56,7 @@ func (shell *Shell) Run() {
 			shell.ReversedShell = nil
 			shell.Scan = nil
 			shell.Script = nil
+			shell.DNS = nil
 			shell.ListenAndServe()
 		default:
 			var generator Generator
@@ -66,6 +68,9 @@ func (shell *Shell) Run() {
 			case shell.Scan != nil:
 				// generate scan shell
 				generator = shell.Scan
+			case shell.DNS != nil:
+				// generator DNS recon script
+				generator = shell.DNS
 			case shell.Script != nil:
 				// generate scan shell
 				generator = shell.Script
@@ -73,9 +78,13 @@ func (shell *Shell) Run() {
 				generator = shell
 			}
 
-			if data, err := generator.Generate(shell.Logger); err == nil {
+			switch data, err := generator.Generate(shell.Logger); err {
+			case nil:
 				// show the script template on STDOUT
 				os.Stdout.Write(data)
+			default:
+				logger.Crit("generate %T: %v", generator, err)
+				return
 			}
 		}
 	}
@@ -90,6 +99,5 @@ func (shell *Shell) Generate(log *logger.Logger) (data []byte, err error) {
 	}
 
 	data = buff.Bytes()
-
 	return
 }

@@ -17,6 +17,7 @@ const (
 	KEY_FORMAT = "format"
 	KEY_ENCODE = "encode"
 	KEY_TARGET = "t"
+	KEY_SERVER = "server"
 
 	KEY_FMT_PYTHON = "python"
 	KEY_FMT_BASH   = "bash"
@@ -32,6 +33,7 @@ var tmplExecBase64 string
 var (
 	RE_REVERSED     = regexp.MustCompile(`^/reversed(?:/(\d+\.\d+\.\d+\.\d+):(\d+))?$`)
 	RE_SCAN         = regexp.MustCompile(`^/scan$`)
+	RE_DNS          = regexp.MustCompile(`^/dns/([\w\.-]+)`)
 	RE_SCRIPT       = regexp.MustCompile(`^/script/(phprfi)(?:/[\S]*)$`)
 	RE_BASH_COMMENT = regexp.MustCompile(`#.*?\n`)
 )
@@ -88,6 +90,14 @@ func (shell *Shell) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		switch format := r.URL.Query()[KEY_FORMAT]; strings.Join(format, "") {
 		case KEY_FMT_WEB:
 			agent.Web = true
+		}
+
+		generator = agent
+	case RE_DNS.MatchString(path):
+		match := RE_REVERSED.FindStringSubmatch(path)
+		agent := &DNS{
+			Server: strings.Join(r.URL.Query()[KEY_SERVER], ""),
+			Domain: &match[1],
 		}
 
 		generator = agent

@@ -1,0 +1,17 @@
+#! /usr/bin/env sh
+# Saas (Shell-as-a-Service) based on https://github.com/cmj0121/ptool/shell
+# This shell-script provide the DNS recon
+
+# show the DNS server version
+dig version.bind CHAOS TXT {{ if .Server }}@{{ .Server }}{{ end }}
+# get the zone transfer records
+dig +noall +answer axfr  {{ if .Server }}@{{ .Server }}{{ end }}
+
+# enum all DNS records for {{ .Domain }}
+dig +noall +answer ANY {{ .Domain }}  {{ if .Server }}@{{ .Server }}{{ end }}
+# enum active directory service
+dig +noall +answer -t _gc._tcp.{{- .Domain }}       {{ if .Server }}@{{ .Server }}{{ end }}
+dig +noall +answer -t _ldap._tcp.{{- .Domain }}     {{ if .Server }}@{{ .Server }}{{ end }}
+dig +noall +answer -t _kerberos._tcp.{{- .Domain }} {{ if .Server }}@{{ .Server }}{{ end }}
+dig +noall +answer -t _kpasswd._tcp.{{- .Domain }}  {{ if .Server }}@{{ .Server }}{{ end }}
+
