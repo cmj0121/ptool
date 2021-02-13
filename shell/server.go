@@ -94,7 +94,7 @@ func (shell *Shell) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 		generator = agent
 	case RE_DNS.MatchString(path):
-		match := RE_REVERSED.FindStringSubmatch(path)
+		match := RE_DNS.FindStringSubmatch(path)
 		agent := &DNS{
 			Server: strings.Join(r.URL.Query()[KEY_SERVER], ""),
 			Domain: &match[1],
